@@ -36,10 +36,10 @@ next-env.d.ts
 
 # old files (from previous Vite setup)
 /client
-/server
-/shared
 script/
 .replit
 replit.nix
 vite.config.ts.*
 *.tar.gz
+build.log
+final-build.log

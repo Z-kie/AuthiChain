@@ -62,23 +62,35 @@ export const scansRelations = relations(scans, ({ one }) => ({
 }));
 
 // === ZOD SCHEMAS ===
-export const insertProductSchema = createInsertSchema(products).omit({ 
-  id: true, 
-  createdAt: true, 
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  createdAt: true,
   updatedAt: true,
   isRegistered: true,
   blockchainTxHash: true,
   trueMarkId: true,
-  trueMarkData: true 
-});
+  trueMarkData: true
+}) as any;
 
 export const insertScanSchema = createInsertSchema(scans).omit({
   id: true,
   createdAt: true
-});
+}) as any;
 
 // === TYPES ===
 export type Product = typeof products.$inferSelect;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type InsertProduct = {
+  name: string;
+  description: string;
+  imageUrl: string;
+  category?: string | null;
+  ownerId: string;
+};
 export type Scan = typeof scans.$inferSelect;
-export type InsertScan = z.infer<typeof insertScanSchema>;
+export type InsertScan = {
+  productId: number;
+  scannerId?: string | null;
+  isAuthentic: boolean;
+  location?: string | null;
+  deviceInfo?: string | null;
+};
