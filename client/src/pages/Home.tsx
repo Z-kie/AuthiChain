@@ -1,9 +1,39 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Cpu, Database, ArrowRight, Scan } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ShieldCheck, Cpu, Database, ArrowRight, Scan, Mail } from "lucide-react";
 import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const emailFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+});
+
+type EmailFormValues = z.infer<typeof emailFormSchema>;
 
 export default function Home() {
+  const form = useForm<EmailFormValues>({
+    resolver: zodResolver(emailFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+    },
+  });
+
+  const onSubmit = (data: EmailFormValues) => {
+    console.log("Email signup submission:", data);
+    // Reset form after submission
+    form.reset();
+  };
+
   return (
     <div className="space-y-20 pb-20">
       {/* Hero Section */}
@@ -46,6 +76,84 @@ export default function Home() {
             </Link>
           </motion.div>
         </div>
+      </section>
+
+      {/* Email Signup Form */}
+      <section className="max-w-2xl mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="relative rounded-2xl overflow-hidden"
+        >
+          {/* Purple gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-purple-600 opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+
+          <div className="relative p-8 md:p-12">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm mb-4">
+                <Mail className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
+                Stay Updated
+              </h2>
+              <p className="text-white/90 text-lg">
+                Get the latest updates on blockchain authentication technology
+              </p>
+            </div>
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white/90">Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your name"
+                          className="h-12 bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-white/90" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white/90">Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Enter your email"
+                          className="h-12 bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-white/90" />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full h-12 bg-white text-primary hover:bg-white/90 font-semibold text-lg shadow-lg"
+                >
+                  Subscribe Now
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </motion.div>
       </section>
 
       {/* Features Grid */}
