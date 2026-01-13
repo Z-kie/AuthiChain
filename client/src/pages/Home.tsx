@@ -118,6 +118,112 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Industries Grid */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            Trusted Across Industries
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            From luxury goods to pharmaceuticals, leading brands trust AuthiChain to protect their products and customers.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <IndustryCard
+            name="Luxury Goods"
+            icon="💎"
+            description="Fashion, jewelry, watches"
+          />
+          <IndustryCard
+            name="Pharmaceuticals"
+            icon="💊"
+            description="Medicine, supplements"
+          />
+          <IndustryCard
+            name="Electronics"
+            icon="📱"
+            description="Devices, components"
+          />
+          <IndustryCard
+            name="Automotive"
+            icon="🚗"
+            description="Parts, accessories"
+          />
+          <IndustryCard
+            name="Food & Beverage"
+            icon="🍷"
+            description="Premium products"
+          />
+          <IndustryCard
+            name="Art & Collectibles"
+            icon="🎨"
+            description="Artwork, memorabilia"
+          />
+          <IndustryCard
+            name="Sports Equipment"
+            icon="⚽"
+            description="Gear, apparel"
+          />
+          <IndustryCard
+            name="Cosmetics"
+            icon="💄"
+            description="Beauty products"
+          />
+        </div>
+      </section>
+
+      {/* Trusted By / Social Proof Section */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h3 className="text-xl font-semibold text-muted-foreground mb-8">
+            Trusted By Industry Leaders
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center justify-items-center">
+          {/* VeChain Logo */}
+          <div className="flex items-center justify-center p-6 rounded-lg bg-card border border-border hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary mb-1">VeChain</div>
+              <div className="text-xs text-muted-foreground">Blockchain Partner</div>
+            </div>
+          </div>
+
+          {/* DNV Logo */}
+          <div className="flex items-center justify-center p-6 rounded-lg bg-card border border-border hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-secondary mb-1">DNV</div>
+              <div className="text-xs text-muted-foreground">Certification Partner</div>
+            </div>
+          </div>
+
+          {/* Placeholder Brand 1 */}
+          <div className="flex items-center justify-center p-6 rounded-lg bg-card border border-border hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-500 mb-1">TrustMark</div>
+              <div className="text-xs text-muted-foreground">Security Partner</div>
+            </div>
+          </div>
+
+          {/* Placeholder Brand 2 */}
+          <div className="flex items-center justify-center p-6 rounded-lg bg-card border border-border hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-500 mb-1">AuthiPro</div>
+              <div className="text-xs text-muted-foreground">Technology Partner</div>
+            </div>
+          </div>
+
+          {/* Placeholder Brand 3 */}
+          <div className="flex items-center justify-center p-6 rounded-lg bg-card border border-border hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-500 mb-1">VerifyX</div>
+              <div className="text-xs text-muted-foreground">Integration Partner</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -144,5 +250,18 @@ function CheckIcon() {
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
+  );
+}
+
+function IndustryCard({ name, icon, description }: { name: string, icon: string, description: string }) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      className="p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-all text-center"
+    >
+      <div className="text-4xl mb-3">{icon}</div>
+      <h4 className="font-bold font-display mb-1">{name}</h4>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </motion.div>
   );
 }
