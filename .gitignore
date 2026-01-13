@@ -1,6 +1,45 @@
-node_modules
-dist
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+/dist
+
+# misc
 .DS_Store
-server/public
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# old files (from previous Vite setup)
+/client
+/server
+/shared
+script/
+.replit
+replit.nix
 vite.config.ts.*
 *.tar.gz
