@@ -24,6 +24,7 @@ import {
 import { Loader2, Upload, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
+import { analytics } from "@/lib/analytics";
 
 export default function CreateProduct() {
   const [, setLocation] = useLocation();
@@ -43,20 +44,37 @@ export default function CreateProduct() {
 
   const onSubmit = (data: InsertProduct) => {
     createProduct.mutate(data, {
-      onSuccess: () => setLocation("/dashboard"),
+      onSuccess: () => {
+        // Track product upload
+        analytics.trackProductUpload(data.category || "Uncategorized", data.name);
+        analytics.trackIndustryUsage(data.category || "Uncategorized");
+
+        // Log summary stats
+        analytics.logSummary();
+
+        setLocation("/dashboard");
+      },
     });
   };
 
   const handleImageAnalysis = async () => {
     if (!imageUrl) return;
-    
+
     // Simulate image upload by just using the URL provided
     // In a real app, we'd upload file -> get URL -> analyze
     form.setValue("imageUrl", imageUrl);
-    
+
     try {
       const result = await classifyImage.mutateAsync(imageUrl);
       form.setValue("category", result.category);
+
+      // Track AI classification with confidence score
+      analytics.trackClassification(
+        result.category,
+        result.confidence,
+        imageUrl
+      );
+
       // Could also autofill description based on attributes
     } catch (error) {
       console.error("Analysis failed", error);
