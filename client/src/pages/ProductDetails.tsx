@@ -1,17 +1,23 @@
 import { useProduct, useRegisterProduct } from "@/hooks/use-products";
 import { useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
-import { 
-  ShieldCheck, 
-  ShieldAlert, 
-  Share2, 
-  Activity, 
-  Box, 
-  ExternalLink 
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Share2,
+  Activity,
+  Box,
+  ExternalLink
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrueMarkScanner } from "@/components/TrueMarkScanner";
+import { MicroscopicAnalysis } from "@/components/MicroscopicAnalysis";
+import { ConfidenceScore } from "@/components/ConfidenceScore";
+import { WorkflowTimeline } from "@/components/WorkflowTimeline";
+import { AIStoryGenerator } from "@/components/AIStoryGenerator";
+import { VeChainBadge } from "@/components/VeChainBadge";
+import { NFTCertificate } from "@/components/NFTCertificate";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -143,7 +149,7 @@ export default function ProductDetails() {
               <ShieldCheck className="w-5 h-5 text-secondary" />
               Blockchain Record
             </h3>
-            
+
             {product.isRegistered ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/10 border border-secondary/20">
@@ -155,7 +161,7 @@ export default function ProductDetails() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Transaction Hash
@@ -183,6 +189,55 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
+
+      {/* New Visualization Components */}
+      {product.isRegistered && (
+        <motion.div
+          className="space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          {/* TrueMark Microscopic Analysis */}
+          <MicroscopicAnalysis isVerified={product.isRegistered} />
+
+          {/* Confidence Score */}
+          <ConfidenceScore
+            score={97.8}
+            category={product.category || "Luxury Goods"}
+          />
+
+          {/* Grid layout for side-by-side components */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Workflow Timeline */}
+            <WorkflowTimeline
+              productName={product.name}
+              currentStage={4}
+            />
+
+            {/* AI Story Generator */}
+            <AIStoryGenerator
+              productName={product.name}
+              category={product.category || "Luxury Goods"}
+            />
+          </div>
+
+          {/* VeChain Badge */}
+          <VeChainBadge
+            txHash={product.blockchainTxHash || "0x7f9a8e3d2c1b4f5a6e9d8c7b6a5e4f3d2c1b9a8e"}
+            verified={product.isRegistered}
+          />
+
+          {/* NFT Certificate */}
+          <NFTCertificate
+            productName={product.name}
+            productId={product.id}
+            imageUrl={product.imageUrl}
+            issueDate={new Date(product.createdAt)}
+            tokenId={product.trueMarkId || "0x1a2b3c4d5e6f"}
+          />
+        </motion.div>
+      )}
     </div>
   );
 }
