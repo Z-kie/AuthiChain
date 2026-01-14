@@ -13,6 +13,12 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { Shield, Search, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { MicroscopicAnalysis } from "@/components/microscopic-analysis"
+import { ConfidenceScore } from "@/components/confidence-score"
+import { WorkflowTimeline } from "@/components/workflow-timeline"
+import { AIStory } from "@/components/ai-story"
+import { VeChainBadge } from "@/components/vechain-badge"
+import { NFTCertificate } from "@/components/nft-certificate"
 
 function VerifyContent() {
   const searchParams = useSearchParams()
@@ -154,6 +160,7 @@ function VerifyContent() {
             <CardContent className="space-y-6">
               {result.result === "authentic" && result.product && (
                 <>
+                  {/* Product Summary */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Product Name</Label>
@@ -175,46 +182,6 @@ function VerifyContent() {
                         <p className="text-lg">{result.product.category}</p>
                       </div>
                     )}
-                    <div>
-                      <Label>Confidence</Label>
-                      <div className="flex items-center space-x-2">
-                        <Badge className="bg-green-500">
-                          {(result.confidence * 100).toFixed(1)}%
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <Label>Blockchain Information</Label>
-                    <div className="mt-2 space-y-2">
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          TrueMark™ ID
-                        </p>
-                        <code className="text-sm font-mono bg-muted p-2 rounded block">
-                          {result.product.truemark_id}
-                        </code>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Transaction Hash
-                        </p>
-                        <code className="text-sm font-mono bg-muted p-2 rounded block truncate">
-                          {result.product.blockchain_tx_hash}
-                        </code>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Registered On
-                        </p>
-                        <p className="text-sm">
-                          {new Date(
-                            result.product.registered_at
-                          ).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
                   </div>
 
                   {result.product.description && (
@@ -247,6 +214,44 @@ function VerifyContent() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* Enhanced Features - Only show when authentic */}
+        {result && result.result === "authentic" && result.product && (
+          <div className="space-y-6 mt-8">
+            {/* VeChain Badge */}
+            <VeChainBadge
+              transactionHash={result.product.blockchain_tx_hash}
+              verified={true}
+            />
+
+            {/* Grid layout for feature components */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Confidence Score */}
+              <ConfidenceScore score={result.confidence} />
+
+              {/* Microscopic Analysis */}
+              <MicroscopicAnalysis confidence={result.confidence} />
+            </div>
+
+            {/* Workflow Timeline */}
+            <WorkflowTimeline productName={result.product.name} />
+
+            {/* AI Story */}
+            <AIStory
+              productName={result.product.name}
+              brand={result.product.brand}
+              category={result.product.category}
+            />
+
+            {/* NFT Certificate */}
+            <NFTCertificate
+              productName={result.product.name}
+              truemarkId={result.product.truemark_id}
+              brand={result.product.brand}
+              issuedDate={result.product.registered_at}
+            />
+          </div>
         )}
 
         {/* How to Find TrueMark™ ID */}
