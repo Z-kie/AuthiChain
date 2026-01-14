@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Plus, Package, CheckCircle, Loader2, LogOut } from "lucide-react"
+import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Product } from "@/lib/supabase/types"
 
@@ -74,6 +74,24 @@ export default function DashboardPage() {
     registered: products.filter((p) => p.is_registered).length,
     pending: products.filter((p) => !p.is_registered).length,
   }
+
+  // AI AutoFlow Analytics
+  const industryBreakdown = products.reduce((acc: Record<string, number>, product: any) => {
+    if (product.industry_id) {
+      acc[product.industry_id] = (acc[product.industry_id] || 0) + 1
+    }
+    return acc
+  }, {} as Record<string, number>)
+
+  const totalWithIndustry = Object.values(industryBreakdown).reduce((sum: number, count: number) => sum + count, 0) as number
+
+  const avgConfidence = products.filter((p: any) => p.confidence)
+    .reduce((sum: number, p: any) => sum + (p.confidence || 0), 0) /
+    (products.filter((p: any) => p.confidence).length || 1)
+
+  const topIndustries = Object.entries(industryBreakdown)
+    .sort(([,a]: [string, number], [,b]: [string, number]) => b - a)
+    .slice(0, 3) as [string, number][]
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,6 +165,114 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        {/* AI AutoFlow Analytics */}
+        {totalWithIndustry > 0 && (
+          <Card className="mb-8 border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-500" />
+                    AI AutoFlow™ Analytics
+                  </CardTitle>
+                  <CardDescription>
+                    Multi-industry portfolio insights
+                  </CardDescription>
+                </div>
+                <Badge variant="secondary" className="bg-purple-500/20 text-purple-700 dark:text-purple-300">
+                  {totalWithIndustry} Products Classified
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Average Confidence */}
+                <div className="p-4 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Avg. Confidence</span>
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                  </div>
+                  <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                    {avgConfidence.toFixed(0)}%
+                  </div>
+                  <div className="mt-2 w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                      style={{ width: `${avgConfidence}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Total Industries */}
+                <div className="p-4 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Industries</span>
+                    <Package className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                    {Object.keys(industryBreakdown).length}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Across multiple sectors
+                  </p>
+                </div>
+
+                {/* Top Industry */}
+                <div className="p-4 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Top Industry</span>
+                    <Shield className="h-4 w-4 text-yellow-500" />
+                  </div>
+                  {topIndustries.length > 0 && (
+                    <>
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 capitalize">
+                        {topIndustries[0][0].replace('-', ' & ')}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {topIndustries[0][1]} products
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Industry Breakdown */}
+              {Object.keys(industryBreakdown).length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-semibold mb-3">Industry Distribution</h4>
+                  <div className="space-y-2">
+                    {Object.entries(industryBreakdown)
+                      .sort(([,a]: any, [,b]: any) => b - a)
+                      .map(([industry, count]: any) => (
+                        <div key={industry} className="flex items-center gap-3">
+                          <div className="flex-1 flex items-center gap-3">
+                            <span className="text-sm font-medium capitalize min-w-[120px]">
+                              {industry.replace('-', ' & ')}
+                            </span>
+                            <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                                style={{ width: `${(count / totalWithIndustry) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                              {count}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              ({((count / totalWithIndustry) * 100).toFixed(0)}%)
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Products List */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold">Your Products</h2>
@@ -207,7 +333,20 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2 text-sm">
-                        {product.category && (
+                        {(product as any).industry_id && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              {((product as any).industry_id as string).replace('-', ' & ')}
+                            </Badge>
+                            {(product as any).confidence && (
+                              <span className="text-xs text-muted-foreground">
+                                {(product as any).confidence}% confidence
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {product.category && !(product as any).industry_id && (
                           <p className="text-muted-foreground">
                             Category: {product.category}
                           </p>

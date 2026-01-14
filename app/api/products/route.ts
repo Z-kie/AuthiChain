@@ -54,7 +54,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, category, brand, imageUrl } = body
+    const {
+      name,
+      description,
+      category,
+      brand,
+      imageUrl,
+      // AI AutoFlow fields
+      industryId,
+      workflow,
+      story,
+      features,
+      authenticityFeatures,
+      confidence
+    } = body
 
     if (!name) {
       return NextResponse.json(
@@ -63,7 +76,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create product
+    // Create product with AI AutoFlow data
     const { data: product, error } = await supabase
       .from('products')
       .insert({
@@ -73,6 +86,13 @@ export async function POST(request: NextRequest) {
         category,
         brand,
         image_url: imageUrl,
+        // AI AutoFlow fields
+        industry_id: industryId,
+        workflow,
+        story,
+        features,
+        authenticity_features: authenticityFeatures,
+        confidence
       })
       .select()
       .single()

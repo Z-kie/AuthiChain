@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, Scan, Lock, TrendingUp, CheckCircle, Zap } from "lucide-react"
+import { Shield, Scan, Lock, TrendingUp, CheckCircle, Zap, Sparkles, Globe } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
@@ -31,14 +31,16 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 mb-4">
+            <Sparkles className="h-4 w-4" />
+            <span className="text-sm font-medium">Powered by AI AutoFlow™</span>
+          </div>
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-            Protect Your Products with{" "}
-            <span className="gradient-text">Blockchain</span>
+            Universal Authentication for{" "}
+            <span className="gradient-text">Any Product</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            AuthiChain combines AI-powered product classification with blockchain
-            technology to create an unbreakable chain of authenticity for your
-            products.
+            AI AutoFlow™ automatically classifies products across 10 industries and generates custom authentication workflows. From cannabis to luxury goods, electronics to pharmaceuticals—one platform for everything.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup">
@@ -54,18 +56,39 @@ export default function Home() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pt-12">
+            <div>
+              <div className="text-4xl font-bold gradient-text">10</div>
+              <div className="text-sm text-muted-foreground">Industries</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold gradient-text">$14T+</div>
+              <div className="text-sm text-muted-foreground">Market Coverage</div>
+            </div>
             <div>
               <div className="text-4xl font-bold gradient-text">98%</div>
-              <div className="text-sm text-muted-foreground">Accuracy Rate</div>
+              <div className="text-sm text-muted-foreground">AI Accuracy</div>
             </div>
             <div>
-              <div className="text-4xl font-bold gradient-text">10M+</div>
-              <div className="text-sm text-muted-foreground">Products Protected</div>
+              <div className="text-4xl font-bold gradient-text">&lt;3s</div>
+              <div className="text-sm text-muted-foreground">Classification Time</div>
             </div>
-            <div>
-              <div className="text-4xl font-bold gradient-text">150+</div>
-              <div className="text-sm text-muted-foreground">Countries</div>
+          </div>
+
+          {/* Industry Icons */}
+          <div className="pt-12 border-t mt-12">
+            <p className="text-sm text-muted-foreground mb-6">Trusted across industries</p>
+            <div className="flex flex-wrap justify-center gap-6 text-4xl">
+              <span title="Cannabis">🌿</span>
+              <span title="Luxury">💎</span>
+              <span title="Electronics">📱</span>
+              <span title="Pharma">💊</span>
+              <span title="Fashion">👔</span>
+              <span title="Automotive">🚗</span>
+              <span title="Food & Beverage">🍷</span>
+              <span title="Art">🎨</span>
+              <span title="Cosmetics">💄</span>
+              <span title="Sports">⚽</span>
             </div>
           </div>
         </div>
@@ -83,13 +106,22 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Card className="border-2 border-purple-500/20 hover:border-purple-500 transition-colors bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+            <CardHeader>
+              <Sparkles className="h-12 w-12 text-purple-500 mb-4" />
+              <CardTitle>AI AutoFlow™ Engine</CardTitle>
+              <CardDescription>
+                Automatically classifies products across 10 industries and generates custom authentication workflows in under 3 seconds
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
           <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
-              <Zap className="h-12 w-12 text-primary mb-4" />
-              <CardTitle>AI Classification</CardTitle>
+              <Globe className="h-12 w-12 text-primary mb-4" />
+              <CardTitle>Universal Platform</CardTitle>
               <CardDescription>
-                GPT-4 Vision analyzes your products instantly, identifying brand,
-                category, and details with 98% accuracy
+                One platform for all industries: Cannabis, Luxury, Electronics, Pharma, Fashion, Automotive, Food, Art, Cosmetics, and Sports
               </CardDescription>
             </CardHeader>
           </Card>

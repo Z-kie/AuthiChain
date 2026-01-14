@@ -30,20 +30,44 @@ The SQL script automatically creates a `product-images` bucket. Verify in Storag
 1. Go to Authentication > Providers
 2. Enable Email provider
 3. Configure email templates (optional)
-4. Set up redirect URLs:
-   - Site URL: `http://localhost:3000` (development)
+4. Set up redirect URLs in Authentication > URL Configuration:
+
+   **For Development:**
+   - Site URL: `http://localhost:3000`
    - Redirect URLs: `http://localhost:3000/auth/callback`
+
+   **For Production:**
+   - Site URL: `https://your-domain.vercel.app` (or your production URL)
+   - Redirect URLs: `https://your-domain.vercel.app/auth/callback`
+
+   **Note:** You can add multiple redirect URLs separated by commas, e.g.:
+   ```
+   http://localhost:3000/auth/callback, https://your-domain.vercel.app/auth/callback
+   ```
 
 ## 5. Environment Variables
 
 Create a `.env.local` file in the root directory:
 
 ```env
+# Site Configuration (IMPORTANT for email redirects)
+NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Use your production URL in production
+
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# OpenAI
 OPENAI_API_KEY=your-openai-api-key
 ```
+
+**For Production (Vercel):**
+Set these environment variables in your Vercel project settings:
+- `NEXT_PUBLIC_SITE_URL` → `https://your-domain.vercel.app`
+- All other variables as above
+
+**Important:** `NEXT_PUBLIC_SITE_URL` is used for email confirmation redirects. If not set correctly, email links will redirect to localhost instead of your production site.
 
 ## 6. Test the Setup
 
