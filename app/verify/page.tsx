@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -20,11 +20,25 @@ import { AIStory } from "@/components/ai-story"
 import { VeChainBadge } from "@/components/vechain-badge"
 import { NFTCertificate } from "@/components/nft-certificate"
 
-function VerifyContent() {
+// Component that handles search params - must be wrapped in Suspense
+function SearchParamsHandler({ onIdFromParams }: { onIdFromParams: (id: string) => void }) {
   const searchParams = useSearchParams()
+  const idFromParams = searchParams.get("id") || ""
+
+  // Pass the ID to parent on mount/update
+  useEffect(() => {
+    if (idFromParams) {
+      onIdFromParams(idFromParams)
+    }
+  }, [idFromParams, onIdFromParams])
+
+  return null
+}
+
+function VerifyContent() {
   const { toast } = useToast()
 
-  const [truemarkId, setTruemarkId] = useState(searchParams.get("id") || "")
+  const [truemarkId, setTruemarkId] = useState("")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
 
@@ -64,8 +78,17 @@ function VerifyContent() {
     }
   }
 
+  const handleIdFromParams = (id: string) => {
+    setTruemarkId(id)
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* SearchParams Handler - wrapped in Suspense */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler onIdFromParams={handleIdFromParams} />
+      </Suspense>
+
       {/* Navigation */}
       <nav className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
