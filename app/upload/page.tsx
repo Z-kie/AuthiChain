@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Upload, ArrowLeft, Loader2, Sparkles } from "lucide-react"
+import { Upload, ArrowLeft, Loader2, Sparkles, Check, Clock } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function UploadPage() {
@@ -25,6 +25,7 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [classified, setClassified] = useState(false)
+  const [classificationData, setClassificationData] = useState<any>(null)
   const [productData, setProductData] = useState({
     name: "",
     category: "",
@@ -52,7 +53,7 @@ export default function UploadPage() {
     setProgress(20)
 
     try {
-      // Classify image using AI
+      // Classify image using AI AutoFlow
       setProgress(40)
       const response = await fetch("/api/classify", {
         method: "POST",
@@ -65,9 +66,13 @@ export default function UploadPage() {
       const data = await response.json()
       setProgress(80)
 
+      // Store full classification data
+      setClassificationData(data)
+
+      // Update product form data
       setProductData({
         name: data.name || "",
-        category: data.category || "",
+        category: data.industry || data.category || "",
         brand: data.brand || "",
         description: data.description || "",
       })
@@ -76,8 +81,8 @@ export default function UploadPage() {
       setProgress(100)
 
       toast({
-        title: "Classification Complete!",
-        description: "AI has analyzed your product successfully.",
+        title: "✨ AI AutoFlow™ Complete!",
+        description: `Classified as ${data.industry || "product"} with ${data.confidence}% confidence`,
       })
     } catch (error) {
       console.error("Classification error:", error)
@@ -137,13 +142,20 @@ export default function UploadPage() {
 
       setProgress(80)
 
-      // Create product in database
+      // Create product in database with AI AutoFlow data
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...productData,
           imageUrl: publicUrl,
+          // AI AutoFlow fields
+          industryId: classificationData?.industryId,
+          workflow: classificationData?.workflow,
+          story: classificationData?.story,
+          features: classificationData?.features,
+          authenticityFeatures: classificationData?.authenticityFeatures,
+          confidence: classificationData?.confidence,
         }),
       })
 
@@ -332,6 +344,109 @@ export default function UploadPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* AI AutoFlow Preview */}
+          {classified && classificationData && (
+            <Card className="border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-purple-500" />
+                      AI AutoFlow™ Preview
+                    </CardTitle>
+                    <CardDescription>
+                      Industry-specific authentication workflow
+                    </CardDescription>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {classificationData.industryIcon}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {classificationData.industry}
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Confidence Score */}
+                <div className="flex items-center justify-between p-4 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <span className="text-sm font-medium">Classification Confidence</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                        style={{ width: `${classificationData.confidence}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                      {classificationData.confidence}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Workflow Steps */}
+                {classificationData.workflow && classificationData.workflow.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Authentication Workflow ({classificationData.workflow.length} Steps)
+                    </h4>
+                    <div className="space-y-2">
+                      {classificationData.workflow.map((step: any, index: number) => (
+                        <div
+                          key={step.id}
+                          className="flex items-start gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg"
+                        >
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-bold">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h5 className="font-medium">{step.name}</h5>
+                              <span className="text-xs text-muted-foreground">{step.duration}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Story Preview */}
+                {classificationData.story && (
+                  <div className="p-4 bg-white/60 dark:bg-black/20 rounded-lg">
+                    <h4 className="text-sm font-semibold mb-2">AI-Generated Origin Story</h4>
+                    <p className="text-sm text-muted-foreground italic">
+                      "{classificationData.story}"
+                    </p>
+                  </div>
+                )}
+
+                {/* Authenticity Features */}
+                {classificationData.authenticityFeatures && classificationData.authenticityFeatures.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">
+                      Authenticity Verification Features
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {classificationData.authenticityFeatures.map((feature: string, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs"
+                        >
+                          <Check className="h-3 w-3" />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Submit Button */}
           <Button

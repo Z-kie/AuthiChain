@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS products (
   truemark_data JSONB,
   blockchain_tx_hash TEXT,
   is_registered BOOLEAN DEFAULT FALSE,
+  -- AI AutoFlow fields
+  industry_id TEXT,
+  workflow JSONB,
+  story TEXT,
+  features JSONB,
+  authenticity_features JSONB,
+  confidence INTEGER,
+  -- Timestamps
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -33,6 +41,7 @@ CREATE TABLE IF NOT EXISTS scans (
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_products_user_id ON products(user_id);
 CREATE INDEX IF NOT EXISTS idx_products_truemark_id ON products(truemark_id);
+CREATE INDEX IF NOT EXISTS idx_products_industry_id ON products(industry_id);
 CREATE INDEX IF NOT EXISTS idx_scans_product_id ON scans(product_id);
 CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
 

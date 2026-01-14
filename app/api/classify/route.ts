@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import {
+  classifyIndustry,
+  generateWorkflow,
+  generateStory,
+  getIndustry,
+  getAllIndustries
+} from '@/lib/industries'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +24,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get all available industries for the prompt
+    const industries = getAllIndustries()
+    const industryList = industries.map(i => i.name).join(', ')
+
     // Use GPT-4 Vision to analyze the product image
     const response = await openai.chat.completions.create({
       model: 'gpt-4-vision-preview',
@@ -26,20 +37,28 @@ export async function POST(request: NextRequest) {
           content: [
             {
               type: 'text',
-              text: `Analyze this product image and provide:
-              1. Product name
-              2. Category (Electronics, Fashion, Luxury, Food & Beverage, Pharmaceuticals, Automotive, or Other)
-              3. Brand (if identifiable)
-              4. Brief description
+              text: `Analyze this product image and provide detailed classification.
 
-              Respond in JSON format:
-              {
-                "name": "product name",
-                "category": "category",
-                "brand": "brand name or Unknown",
-                "description": "brief description",
-                "confidence": 0.95
-              }`,
+Available industries: ${industryList}
+
+Provide:
+1. Product name (be specific)
+2. Industry category (choose the most appropriate from the list above)
+3. Brand (if identifiable, otherwise "Unknown")
+4. Detailed description (2-3 sentences about the product)
+5. Key features (list 3-5 distinguishing features)
+6. Confidence score (0-100, how confident you are in the classification)
+
+Respond in JSON format:
+{
+  "name": "specific product name",
+  "category": "industry category from the list",
+  "brand": "brand name or Unknown",
+  "description": "detailed product description",
+  "features": ["feature 1", "feature 2", "feature 3"],
+  "confidence": 95,
+  "keywords": ["keyword1", "keyword2", "keyword3"]
+}`,
             },
             {
               type: 'image_url',
@@ -50,7 +69,7 @@ export async function POST(request: NextRequest) {
           ],
         },
       ],
-      max_tokens: 500,
+      max_tokens: 800,
     })
 
     const content = response.choices[0]?.message?.content
@@ -62,7 +81,43 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse the JSON response
-    const result = JSON.parse(content)
+    const aiResult = JSON.parse(content)
+
+    // Classify into our industry system
+    const industryId = classifyIndustry(
+      aiResult.keywords || [],
+      aiResult.name,
+      aiResult.description
+    )
+
+    const industry = getIndustry(industryId)
+
+    // Generate industry-specific workflow
+    const workflow = generateWorkflow(industryId)
+
+    // Generate AI story
+    const story = generateStory(
+      industryId,
+      aiResult.name,
+      aiResult.brand,
+      {
+        strain: aiResult.features?.[0] || '',
+        location: 'certified facilities',
+        artist: aiResult.brand
+      }
+    )
+
+    // Combine results
+    const result = {
+      ...aiResult,
+      industryId,
+      industry: industry?.name,
+      industryIcon: industry?.icon,
+      workflow,
+      story,
+      authenticityFeatures: industry?.authenticityFeatures || [],
+      marketSize: industry?.marketSize
+    }
 
     return NextResponse.json(result)
   } catch (error) {
