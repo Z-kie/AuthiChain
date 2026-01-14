@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Shield, CheckCircle, Loader2, Copy, ExternalLink } from "lucide-react"
+import { ArrowLeft, Shield, CheckCircle, Loader2, Copy, ExternalLink, Sparkles, Clock, Star } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Product } from "@/lib/supabase/types"
 
@@ -239,6 +239,121 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 <p className="text-muted-foreground">{product.description}</p>
               )}
             </div>
+
+            {/* AI AutoFlow Classification */}
+            {(product as any).industry_id && (
+              <Card className="border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-500" />
+                    AI AutoFlow™ Classification
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Industry</p>
+                      <p className="text-lg font-semibold capitalize">
+                        {((product as any).industry_id as string).replace('-', ' & ')}
+                      </p>
+                    </div>
+                    {(product as any).confidence && (
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Confidence</p>
+                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          {(product as any).confidence}%
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {(product as any).features && (product as any).features.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium mb-2">Detected Features</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(product as any).features.map((feature: string, index: number) => (
+                          <Badge key={index} variant="outline" className="bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                            <Star className="h-3 w-3 mr-1" />
+                            {feature}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* AI Story */}
+            {(product as any).story && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    📖 Product Origin Story
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground italic leading-relaxed">
+                    "{(product as any).story}"
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Authentication Workflow */}
+            {(product as any).workflow && (product as any).workflow.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Authentication Workflow
+                  </CardTitle>
+                  <CardDescription>
+                    Industry-specific verification process ({(product as any).workflow.length} steps)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {(product as any).workflow.map((step: any, index: number) => (
+                      <div key={step.id} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-medium">{step.name}</h4>
+                            <span className="text-xs text-muted-foreground">{step.duration}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{step.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Authenticity Features */}
+            {(product as any).authenticity_features && (product as any).authenticity_features.length > 0 && (
+              <Card className="border-green-500/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-green-500" />
+                    Authenticity Verification Features
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-2">
+                    {(product as any).authenticity_features.map((feature: string, index: number) => (
+                      <div key={index} className="flex items-center gap-2 p-2 rounded bg-green-50 dark:bg-green-900/20">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Blockchain Info */}
             {product.is_registered ? (

@@ -56,6 +56,13 @@ export async function GET(
           truemark_id: product.truemark_id,
           blockchain_tx_hash: product.blockchain_tx_hash,
           registered_at: product.created_at,
+          // AI AutoFlow data
+          industry_id: product.industry_id,
+          workflow: product.workflow,
+          story: product.story,
+          features: product.features,
+          authenticity_features: product.authenticity_features,
+          ai_confidence: product.confidence,
         },
         confidence: 0.98,
         message: 'Product verified as authentic',
