@@ -9,8 +9,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Shield, Search, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react"
+import { Shield, Search, CheckCircle, XCircle, Loader2, Trophy, Flame, Star } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Confetti } from "@/components/gamification/Confetti"
+import { PointsAnimation } from "@/components/gamification/PointsAnimation"
+import { AchievementUnlock } from "@/components/gamification/AchievementUnlock"
+import { LevelUpAnimation } from "@/components/gamification/LevelUpAnimation"
+import { formatPoints, getStreakEmoji } from "@/lib/gamification"
 
 export default function VerifyPage() {
   const searchParams = useSearchParams()
@@ -19,6 +24,11 @@ export default function VerifyPage() {
   const [truemarkId, setTruemarkId] = useState(searchParams.get("id") || "")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [showPoints, setShowPoints] = useState(false)
+  const [showLevelUp, setShowLevelUp] = useState(false)
+  const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0)
+  const [animationQueue, setAnimationQueue] = useState<string[]>([])
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,6 +54,34 @@ export default function VerifyPage() {
 
       const data = await response.json()
       setResult(data)
+
+      // Trigger gamification animations if data exists
+      if (data.gamification) {
+        const queue: string[] = []
+
+        // Always show confetti for authentic products
+        if (data.result === 'authentic') {
+          setShowConfetti(true)
+        }
+
+        // Queue animations
+        if (data.gamification.pointsAwarded > 0) {
+          queue.push('points')
+        }
+        if (data.gamification.levelUp) {
+          queue.push('levelup')
+        }
+        if (data.gamification.achievements && data.gamification.achievements.length > 0) {
+          data.gamification.achievements.forEach(() => queue.push('achievement'))
+        }
+
+        setAnimationQueue(queue)
+
+        // Start animation sequence
+        if (queue.length > 0) {
+          setTimeout(() => playNextAnimation(queue, 0), 500)
+        }
+      }
     } catch (error) {
       console.error("Verification error:", error)
       toast({
@@ -56,8 +94,62 @@ export default function VerifyPage() {
     }
   }
 
+  const playNextAnimation = (queue: string[], index: number) => {
+    if (index >= queue.length) return
+
+    const animation = queue[index]
+
+    if (animation === 'points') {
+      setShowPoints(true)
+    } else if (animation === 'levelup') {
+      setShowLevelUp(true)
+    } else if (animation === 'achievement') {
+      setCurrentAchievementIndex(index - queue.filter((a, i) => i < index && a !== 'achievement').length)
+    }
+  }
+
+  const handleAnimationComplete = () => {
+    const currentIndex = animationQueue.findIndex((a, i) => {
+      if (a === 'points' && showPoints) return true
+      if (a === 'levelup' && showLevelUp) return true
+      return false
+    })
+
+    if (currentIndex !== -1 && currentIndex < animationQueue.length - 1) {
+      setTimeout(() => playNextAnimation(animationQueue, currentIndex + 1), 300)
+    }
+
+    setShowPoints(false)
+    setShowLevelUp(false)
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Gamification Animations */}
+      <Confetti active={showConfetti} duration={3000} />
+      <PointsAnimation
+        points={result?.gamification?.pointsAwarded || 0}
+        active={showPoints}
+        onComplete={handleAnimationComplete}
+      />
+      <LevelUpAnimation
+        level={result?.gamification?.level || 0}
+        active={showLevelUp}
+        onComplete={handleAnimationComplete}
+      />
+      {result?.gamification?.achievements?.map((achievement: any, index: number) => (
+        <AchievementUnlock
+          key={achievement.id}
+          achievement={index === currentAchievementIndex ? achievement : null}
+          onComplete={() => {
+            const nextIndex = currentAchievementIndex + 1
+            if (nextIndex < result.gamification.achievements.length) {
+              setTimeout(() => setCurrentAchievementIndex(nextIndex), 300)
+            }
+          }}
+        />
+      ))}
+
       {/* Navigation */}
       <nav className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -240,6 +332,93 @@ export default function VerifyPage() {
                       If you believe this is an error, please contact the manufacturer
                       or seller for verification.
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Gamification Rewards Summary */}
+              {result.gamification && (
+                <div className="border-t pt-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Trophy className="w-5 h-5 text-yellow-500" />
+                    <h3 className="text-lg font-semibold">Rewards Earned</h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 p-4 rounded-lg border border-yellow-500/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <p className="text-sm font-medium text-muted-foreground">Points</p>
+                      </div>
+                      <p className="text-2xl font-bold text-yellow-500">
+                        +{formatPoints(result.gamification.pointsAwarded)}
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4 rounded-lg border border-purple-500/20">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Level</p>
+                      <p className="text-2xl font-bold text-purple-500">
+                        {result.gamification.level}
+                        {result.gamification.levelUp && (
+                          <span className="text-sm ml-1 text-green-500">↑</span>
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 p-4 rounded-lg border border-orange-500/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Flame className="w-4 h-4 text-orange-500" />
+                        <p className="text-sm font-medium text-muted-foreground">Streak</p>
+                      </div>
+                      <p className="text-2xl font-bold text-orange-500">
+                        {result.gamification.streak} {getStreakEmoji(result.gamification.streak)}
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4 rounded-lg border border-blue-500/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Trophy className="w-4 h-4 text-blue-500" />
+                        <p className="text-sm font-medium text-muted-foreground">Achievements</p>
+                      </div>
+                      <p className="text-2xl font-bold text-blue-500">
+                        +{result.gamification.achievements?.length || 0}
+                      </p>
+                    </div>
+                  </div>
+
+                  {result.gamification.achievements && result.gamification.achievements.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">New Achievements Unlocked:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {result.gamification.achievements.map((achievement: any) => (
+                          <Badge
+                            key={achievement.id}
+                            variant="outline"
+                            className="px-3 py-1.5 border-yellow-500/50 bg-yellow-500/10"
+                          >
+                            <span className="mr-1">{achievement.icon}</span>
+                            {achievement.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {result.gamification.levelUp && (
+                    <div className="mt-4 p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg border border-purple-500/30">
+                      <p className="text-sm font-semibold text-center">
+                        🎉 Congratulations! You leveled up to Level {result.gamification.level}!
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-4 text-center">
+                    <Link href="/dashboard">
+                      <Button variant="outline" size="sm">
+                        View Full Stats
+                        <Trophy className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               )}

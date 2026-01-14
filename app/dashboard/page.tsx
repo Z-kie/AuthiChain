@@ -10,7 +10,9 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { Shield, Plus, Package, CheckCircle, Loader2, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import type { Product } from "@/lib/supabase/types"
+import { UserStatsCard } from "@/components/gamification/UserStatsCard"
+import { getUserStats, getUserAchievements } from "@/lib/gamification"
+import type { Product, UserStats, Achievement } from "@/lib/supabase/types"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -20,6 +22,8 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [userStats, setUserStats] = useState<UserStats | null>(null)
+  const [userAchievements, setUserAchievements] = useState<Achievement[]>([])
 
   useEffect(() => {
     checkUser()
@@ -35,6 +39,13 @@ export default function DashboardPage() {
     }
 
     setUser(user)
+
+    // Fetch gamification stats
+    const stats = await getUserStats(user.id)
+    const achievements = await getUserAchievements(user.id)
+
+    setUserStats(stats)
+    setUserAchievements(achievements)
   }
 
   const fetchProducts = async () => {
@@ -110,7 +121,10 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Stats */}
+        {/* Gamification Stats */}
+        <UserStatsCard stats={userStats} achievements={userAchievements} />
+
+        {/* Product Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

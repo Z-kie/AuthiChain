@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createHash, randomBytes } from 'crypto'
+import { awardPoints, checkAndAwardAchievements, getUserStats, POINTS } from '@/lib/gamification'
 
 // Generate TrueMark™ ID and blockchain transaction hash
 function generateTrueMark() {
@@ -101,10 +102,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Award points for registration
+    const stats = await getUserStats(user.id)
+    const isFirstRegistration = stats?.total_registrations === 0
+    const pointsToAward = isFirstRegistration ? POINTS.REGISTRATION * 2 : POINTS.REGISTRATION
+
+    const gamificationResult = await awardPoints(user.id, pointsToAward, 'registration')
+
+    let gamificationData = null
+    if (gamificationResult) {
+      const updatedStats = await getUserStats(user.id)
+      const newAchievements = updatedStats
+        ? await checkAndAwardAchievements(user.id, updatedStats)
+        : []
+
+      gamificationData = {
+        pointsAwarded: gamificationResult.points_awarded,
+        newTotal: gamificationResult.new_total,
+        level: gamificationResult.level,
+        levelUp: gamificationResult.level_up,
+        streak: gamificationResult.streak,
+        achievements: newAchievements,
+      }
+    }
+
     return NextResponse.json({
       success: true,
       product: updatedProduct,
       message: 'Product successfully registered on blockchain',
+      gamification: gamificationData,
     })
   } catch (error) {
     console.error('Registration error:', error)
