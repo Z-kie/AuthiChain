@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+export const dynamic = 'force-dynamic'
+
+import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -12,7 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Shield, Search, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-export default function VerifyPage() {
+function VerifyContent() {
   const searchParams = useSearchParams()
   const { toast } = useToast()
 
@@ -292,5 +294,17 @@ export default function VerifyPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <VerifyContent />
+    </Suspense>
   )
 }
