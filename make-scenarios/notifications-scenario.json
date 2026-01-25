@@ -1,0 +1,126 @@
+{
+  "name": "AuthiChain - Notifications",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway",
+            "label": "Webhook",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": {},
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "slack:ActionCreateMessage",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "channel": "{{slackChannel}}",
+                "text": "Alert: {{1.alertType}} - {{1.message}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": -100
+                }
+              },
+              "filter": {
+                "name": "Slack Alert",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.notificationType}}",
+                      "b": "slack",
+                      "o": "text:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "sendgrid:ActionSendEmail",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "to": "{{1.email}}",
+                "subject": "AuthiChain Alert: {{1.alertType}}",
+                "body": "{{1.message}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 100
+                }
+              },
+              "filter": {
+                "name": "Email Alert",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.notificationType}}",
+                      "b": "email",
+                      "o": "text:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}
