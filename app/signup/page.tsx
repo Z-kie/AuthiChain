@@ -52,7 +52,9 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`,
+          // Redirect users to a dedicated confirmation page after they click the emailed link.
+          // This provides a consistent UX whether or not the session is immediately available.
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/confirmed`,
         },
       })
 
@@ -63,11 +65,12 @@ export default function SignupPage() {
         description: "Please check your email to confirm your account.",
       })
 
-      // If email confirmation is disabled, redirect to dashboard
-      if (data.user && !data.user.identities?.length) {
+      // If Supabase returned a user/session the user was auto-signed-in — go to dashboard.
+      // Otherwise, send the user to the confirmation instructions page.
+      if (data?.user) {
         router.push("/dashboard")
       } else {
-        router.push("/login")
+        router.push("/auth/confirmed")
       }
     } catch (error: any) {
       console.error("Signup error:", error)
@@ -116,6 +119,7 @@ export default function SignupPage() {
                   required
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
@@ -151,18 +155,15 @@ export default function SignupPage() {
                     Creating account...
                   </>
                 ) : (
-                  "Create Account"
+                  "Create account"
                 )}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <div className="text-sm text-center text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline font-medium">
-                Sign in
-              </Link>
-            </div>
+          <CardFooter className="text-center">
+            <p className="text-sm">
+              Already have an account? <Link href="/login" className="text-primary underline">Sign in</Link>
+            </p>
           </CardFooter>
         </Card>
       </div>
